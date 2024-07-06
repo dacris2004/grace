@@ -65,6 +65,7 @@ display_menu() {
     echo "Apasati '+' pentru a adauga cantitate."
     echo "Apasati '-' pentru a scadea cantitate."
     echo "Apasati 'p' pentru a tipari cosul la casa de marcat."
+    echo "Apasati 'x' pentru anulare cos de cumparaturi."
     echo "Apasati 'q' pentru a iesi."
 }
 
@@ -150,6 +151,12 @@ while true; do
                 fi
             fi
             ;;
+	'x') #anulare cos
+	    clear
+	    cart=()
+	    display_cos
+            ;;
+		
         p) # Tiparim cosul
             clear
             display_cos
