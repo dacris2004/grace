@@ -7,3 +7,9 @@ menu_v<x>.sh contine ultima versiune de program
 
 produse.txt contine intrari de tipul
 NUME PRODUS:10 RON
+
+
+De adaugat:
+- apasare x - anulare/golire cos
+- produse listate in cos ordonat dupa indexul produsului nu in ordinea adaugarii
+  
