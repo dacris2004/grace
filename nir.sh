@@ -153,7 +153,11 @@ list_last_nir() {
     local last_nir_file=$(ls -1t "${NIR_DIR}/nir_"*.txt 2>/dev/null | head -n1)
     if [[ -n "$last_nir_file" ]]; then
         echo "Ultimul NIR salvat:"
+        echo "============================================="
         cat "$last_nir_file"
+        echo "============================================="
+        local total_general=$(awk -F':' 'NR > 1 { sum += $2 * $3 } END { printf "Total NIR = %.2f\n", sum }' "$last_nir_file")
+        echo "$total_general"
     else
         echo "Nu exista niciun NIR salvat."
     fi
