@@ -47,15 +47,22 @@ display_menu() {
 
 # Functie pentru afisarea continutului NIR-ului
 display_nir() {
+    local total_general=0
     echo ""
     echo "=== Continut NIR ==="
     for item in "${nir[@]}"; do
-        echo "$item"
+        local product_name=$(echo "$item" | cut -d':' -f1)
+        local quantity=$(echo "$item" | cut -d':' -f2)
+        local purchase_price=$(echo "$item" | cut -d':' -f3)
+        local line_total=$(echo "scale=2; $quantity * $purchase_price" | bc)
+        total_general=$(echo "scale=2; $total_general + $line_total" | bc)
+        printf "%s: %d x %.2f = %.2f\n" "$product_name" "$quantity" "$purchase_price" "$line_total"
     done
+    echo "Total NIR = $total_general"
     echo ""
 }
 
-# Functie pentru a adauga un produs in NIR cu pre\u241b de achizi\u241bie
+# Functie pentru a adauga un produs in NIR cu pre\u241b de achizi\u241bie (cu doua zecimale)
 add_to_nir() {
     local product="${products[$current_index]}"
     local product_entry="$(printf "%s" "$product")"
@@ -74,16 +81,19 @@ add_to_nir() {
     done
 
     # Daca nu, adaugam produsul cu cantitate 1 si pret de achizitie
-    echo -n "Introduceti pretul de achizitie pentru $product: "
-    read -r product_purchase_price
+    while true; do
+        echo -n "Introduceti pretul de achizitie pentru $product (cu doua zecimale): "
+        read -r product_purchase_price
 
-    # Validam ca pretul de achizitie sa contina doar cifre
-    if validate_digits "$product_purchase_price"; then
-        nir+=("${product_entry}:1:${product_purchase_price}")
-    else
-        echo "Pretul de achizitie introdus nu este valid. Produsul nu a fost adaugat in NIR."
-        read -rsn1 -p "Apasati orice tasta pentru a continua..."
-    fi
+        # Validam ca pretul de achizitie sa contina doar cifre si doua zecimale
+        if [[ "$product_purchase_price" =~ ^[0-9]+(\.[0-9]{1,2})?$ ]]; then
+            break
+        else
+            echo "Pretul de achizitie introdus nu este valid. Introduceti un numar valid (cu doua zecimale)."
+        fi
+    done
+
+    nir+=("${product_entry}:1:${product_purchase_price}")
 }
 
 # Functie pentru reducerea cantitatii unui produs din NIR
@@ -188,8 +198,8 @@ while true; do
             ;;
         p)
             save_nir
-            break
-            ;;
+	    nir=()
+	    ;;
         q)
             echo "Iesire fara a salva NIR-ul..."
             break
