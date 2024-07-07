@@ -39,12 +39,21 @@ display_products() {
     echo "Apasati 'a' pentru a adauga un produs, 'd' pentru a sterge un produs, 'q' pentru a iesi."
 }
 
-# Functie pentru a adauga un produs nou
+ Functie pentru a adauga un produs nou
 add_product() {
     echo -n "Introduceti numele produsului: "
     read -r product_name
-    echo -n "Introduceti pretul produsului: "
-    read -r product_price
+    product_name=$(echo "$product_name" | tr '[:lower:]' '[:upper:]')
+
+    while true; do
+        echo -n "Introduceti pretul produsului (numai cifre): "
+        read -r product_price
+        if [[ "$product_price" =~ ^[0-9]+$ ]]; then
+            break
+        else
+            echo "Pret invalid. Va rugam introduceti numai cifre."
+        fi
+    done
 
     if [[ -n "$product_name" && -n "$product_price" ]]; then
         echo "$product_name:$product_price RON" >> "$FILE"
@@ -54,6 +63,8 @@ add_product() {
         echo "Nume sau pret invalid. Produsul nu a fost adaugat."
     fi
 }
+
+
 
 # Functie pentru a sterge un produs
 delete_product() {
