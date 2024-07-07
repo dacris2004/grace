@@ -91,12 +91,8 @@ display_menu() {
     
     echo "Apasati sagetile sus/jos pentru a naviga, Enter pentru a adauga/scoate din cos."
     echo "Apasati doua cifre pentru a adauga/scoate produsul."
-    echo "Apasati '+' pentru a adauga cantitate."
-    echo "Apasati '-' pentru a scadea cantitate."
-    echo "Apasati 'p' pentru a tipari cosul la casa de marcat."
-    echo "Apasati 'x' pentru anulare cos de cumparaturi."
-    echo "Apasati 't' pentru a afisa totalul vanzarilor pe ziua curenta."
-    echo "Apasati 'T' pentru a afisa totalul vanzarilor pe luna curenta."
+    echo "Apasati '+' pentru a adauga cantitate, '-' pentru a scadea cantitate, 'p' pentru a tipari cosul la casa de marcat, 'x' pentru anulare cos de cumparaturi."
+    echo "Apasati 'l' pentru a afisa ultimul bon tiparit, 't' pentru a afisa totalul vanzarilor pe ziua curenta, 'T' pentru a afisa totalul vanzarilor pe luna curenta."
     echo "Apasati 'q' pentru a iesi."
 }
 
@@ -128,6 +124,23 @@ calculate_monthly_total() {
     done
 
     echo "Totalul vanzarilor pentru luna curenta: $monthly_total RON"
+}
+
+# Functie pentru a afisa ultimul cos de cumparaturi
+display_last_cart() {
+    local last_file=$(ls -t "$SALES_DIR"/*.txt 2>/dev/null | head -n 1)
+    if [[ -n "$last_file" && -f "$last_file" ]]; then
+        clear
+        local file_time=$(stat -c %y "$last_file" | cut -d'.' -f1)
+        echo "=== Ultimul Cos de Cumparaturi ==="
+        echo "Data si ora vanzarii: $file_time"
+        cat "$last_file"
+        echo "============================="
+        echo "Apasati orice tasta pentru a reveni la meniu."
+        read -rsn1
+    else
+        echo "Nu exista un cos de cumparaturi salvat."
+    fi
 }
 
 # Initializam cosul de cumparaturi si indexul curent
@@ -212,7 +225,7 @@ while true; do
                 fi
             fi
             ;;
-	'x') #anulare cos
+	x) #anulare cos
 	    clear
 	    cart=()
 	    display_cos
@@ -239,6 +252,9 @@ while true; do
             echo "============================================="
             echo "Apasati orice tasta pentru a reveni la meniu."
             read -rsn1
+            ;;
+	l) # Afisam ultimul cos de cumparaturi
+            display_last_cart
             ;;
         q) # Iesim din program
             break
