@@ -43,6 +43,8 @@ display_menu() {
     echo "Apasati '+' pentru a adauga cantitate, '-' pentru a reduce cantitate."
     echo "Apasati 'p' pentru a finaliza si salva NIR-ul."
     echo "Apasati 'q' pentru a iesi fara a salva."
+    echo "Apasati 'l' pentru a lista ultimul NIR salvat."
+    echo "Apasati 'x' pentru a anula NIR-ul curent."
 }
 
 # Functie pentru afisarea continutului NIR-ului
@@ -62,7 +64,7 @@ display_nir() {
     echo ""
 }
 
-# Functie pentru a adauga un produs in NIR cu pre\u241b de achizi\u241bie (cu doua zecimale)
+# Functie pentru a adauga un produs in NIR cu pret de achizitie (cu doua zecimale)
 add_to_nir() {
     local product="${products[$current_index]}"
     local product_entry="$(printf "%s" "$product")"
@@ -121,6 +123,7 @@ reduce_from_nir() {
 
 # Functie pentru a salva NIR-ul intr-un fisier
 save_nir() {
+  if [ ${#nir[@]} -gt 0 ]; then 
     local timestamp=$(date +%Y%m%d%H%M%S)
     local nir_file="${NIR_DIR}/nir_${timestamp}.txt"
     
@@ -142,6 +145,24 @@ save_nir() {
     done
 
     echo "NIR-ul a fost salvat in ${nir_file}."
+  fi
+}
+
+# Functie pentru listarea ultimului NIR salvat
+list_last_nir() {
+    local last_nir_file=$(ls -1t "${NIR_DIR}/nir_"*.txt 2>/dev/null | head -n1)
+    if [[ -n "$last_nir_file" ]]; then
+        echo "Ultimul NIR salvat:"
+        cat "$last_nir_file"
+    else
+        echo "Nu exista niciun NIR salvat."
+    fi
+}
+
+# Functie pentru anularea NIR-ului curent
+cancel_nir() {
+    echo "NIR-ul curent a fost anulat."
+    nir=()
 }
 
 # Functie pentru a valida ca un input contine doar cifre
@@ -198,11 +219,19 @@ while true; do
             ;;
         p)
             save_nir
-	    nir=()
-	    ;;
+            nir=()
+            ;;
         q)
             echo "Iesire fara a salva NIR-ul..."
             break
+            ;;
+        l)
+            list_last_nir
+            echo "Apasati orice tasta pentru a continua..."
+            read -rsn1
+            ;;
+        x)
+            cancel_nir
             ;;
         *)
             if [[ "$input" =~ [0-9] ]]; then
