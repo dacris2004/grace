@@ -36,10 +36,10 @@ display_products() {
     done
 
     echo "========================================================="
-    echo "Apasati 'a' pentru a adauga un produs, 'd' pentru a sterge un produs, 'q' pentru a iesi."
+    echo "Apasati 'a' pentru a adauga un produs, 'i' pentru a insera un produs, 'd' pentru a sterge un produs, 'q' pentru a iesi."
 }
 
- Functie pentru a adauga un produs nou
+# Functie pentru a adauga un produs nou
 add_product() {
     echo -n "Introduceti numele produsului: "
     read -r product_name
@@ -56,15 +56,20 @@ add_product() {
     done
 
     if [[ -n "$product_name" && -n "$product_price" ]]; then
-        echo "$product_name:$product_price RON" >> "$FILE"
+        local new_product="$product_name:$product_price RON"
+        if [[ -n "$1" ]]; then
+            local index="$1"
+            products=("${products[@]:0:$index}" "$new_product" "${products[@]:$index}")
+        else
+            products+=("$new_product")
+        fi
+        printf "%s\n" "${products[@]}" > "$FILE"
         read_products
         display_products
     else
         echo "Nume sau pret invalid. Produsul nu a fost adaugat."
     fi
 }
-
-
 
 # Functie pentru a sterge un produs
 delete_product() {
@@ -82,6 +87,7 @@ read_products
 
 # Afisam meniul initial
 display_products
+
 
 # Bucla principala pentru a gestiona intrarile utilizatorului
 while true; do
@@ -117,6 +123,9 @@ while true; do
             ;;
         a)
             add_product
+            ;;
+        i)
+            add_product "$current_index"
             ;;
         d)
             delete_product
