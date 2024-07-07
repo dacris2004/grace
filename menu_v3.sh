@@ -257,11 +257,17 @@ while true; do
             display_last_cart
             ;;
         q) # Iesim din program
-            break
+            clear
+	    calculate_daily_total
+	    calculate_monthly_total
+	    echo "Felicitari! Mult succes in continuare!"
+	    echo "=============================================="
+            echo "Apasati orice tasta pentru a iesi din program."
+            read -rsn1
+	    break
             ;;
     esac
     display_menu
 done
 
-clear
 echo "Program inchis."
