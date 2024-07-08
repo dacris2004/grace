@@ -43,7 +43,7 @@ display_menu() {
     echo "Apasati '+' pentru a adauga cantitate, '-' pentru a reduce cantitate."
     echo "Apasati 'p' pentru a finaliza si salva NIR-ul."
     echo "Apasati 'q' pentru a iesi fara a salva."
-    echo "Apasati 'l' pentru a lista ultimul NIR salvat."
+    echo "Apasati 'l' pentru a lista toate NIR-urile."
     echo "Apasati 'x' pentru a anula NIR-ul curent."
 }
 
@@ -123,10 +123,10 @@ reduce_from_nir() {
 
 # Functie pentru a salva NIR-ul intr-un fisier
 save_nir() {
-  if [ ${#nir[@]} -gt 0 ]; then 
+  if [ ${#nir[@]} -gt 0 ]; then
     local timestamp=$(date +%Y%m%d%H%M%S)
     local nir_file="${NIR_DIR}/nir_${timestamp}.txt"
-    
+
     echo -n "Introduceti numarul documentului NIR: "
     read -r document_number
     echo -n "Introduceti numele furnizorului: "
@@ -177,6 +177,62 @@ validate_digits() {
     else
         return 1
     fi
+}
+
+# Functie pentru listarea tuturor NIR-urilor
+list_all_nirs() {
+    local nir_files=($(ls -1 "${NIR_DIR}/nir_"*.txt 2>/dev/null))
+    local nir_index=0
+
+    if [[ ${#nir_files[@]} -eq 0 ]]; then
+        echo "Nu exista niciun NIR salvat."
+        return
+    fi
+
+    while true; do
+        clear
+        echo "=== Lista NIR-uri ==="
+        for i in "${!nir_files[@]}"; do
+            local file="${nir_files[$i]}"
+            local file_info=$(head -n 1 "$file")
+            if [[ $i -eq $nir_index ]]; then
+                printf "\e[7m%s\e[0m\n" "$file_info"
+            else
+                echo "$file_info"
+            fi
+        done
+
+        echo "============================================="
+        echo "Continutul NIR-ului selectat:"
+        echo "============================================="
+        cat "${nir_files[$nir_index]}" | tail -n +2
+        echo "============================================="
+        local total_general=$(awk -F':' 'NR > 1 { sum += $2 * $3 } END { printf "Total NIR = %.2f\n", sum }' "${nir_files[$nir_index]}")
+        echo "$total_general"
+	echo "Apasati 'q' pentru a iesi."
+        read -rsn1 input
+        case "$input" in
+            $'\x1b') # Detectam tasta Esc
+                read -rsn2 -t 0.1 input
+                if [[ "$input" == "[A" ]]; then
+                    # Sageata sus
+                    ((nir_index--))
+                    if [[ $nir_index -lt 0 ]]; then
+                        nir_index=$(( ${#nir_files[@]} - 1 ))
+                    fi
+                elif [[ "$input" == "[B" ]]; then
+                    # Sageata jos
+                    ((nir_index++))
+                    if [[ $nir_index -ge ${#nir_files[@]} ]]; then
+                        nir_index=0
+                    fi
+                fi
+                ;;
+            q)
+                return
+                ;;
+        esac
+    done
 }
 
 # Initializam indexul curent si NIR-ul
@@ -230,9 +286,9 @@ while true; do
             break
             ;;
         l)
-            list_last_nir
-            echo "Apasati orice tasta pentru a continua..."
-            read -rsn1
+            list_all_nirs
+            #echo "Apasati orice tasta pentru a continua..."
+            #read -rsn1
             ;;
         x)
             cancel_nir
@@ -256,3 +312,4 @@ while true; do
 done
 
 echo "Program inchis."
+
